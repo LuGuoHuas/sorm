@@ -1,4 +1,4 @@
-# sorm
+``````````# sorm
 A Simple ORM
 
 ## example
@@ -17,15 +17,15 @@ type ObjectModel2 struct {
     Field2  sorm.Varchar    `json:"field_2"`
 }
 
-var obj1 = ObjectModel1{
+var obj1 = sorm.Make(ObjectModel1{
     Field1: "field_1",
     Field2: 2,
-}
+}).(ObjectModel1)
 
-var obj2 = ObjectModel2{
+var obj2 = sorm.Make(ObjectModel2{
     Field1: 1,
     Field2: "filed_2",
-}
+}).(ObjectModel2)
 
 
 // Create Record
