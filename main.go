@@ -4,19 +4,6 @@ import (
 	"database/sql"
 )
 
-type sorm interface {
-	instant(object interface{})
-	getTag(field interface{}) string
-}
-
-type Model struct {
-	Object interface{}
-}
-
-func Make(model sorm) {
-	model.instant(model)
-}
-
 type DB struct {
 	db *sql.DB
 }

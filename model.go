@@ -4,6 +4,19 @@ import (
 	"reflect"
 )
 
+type sorm interface {
+	instant(object interface{})
+	getTag(field interface{}) string
+}
+
+type Model struct {
+	Object interface{}
+}
+
+func Make(model sorm) {
+	model.instant(model)
+}
+
 func (m *Model) instant(object interface{}) {
 	m.Object = object
 }
