@@ -56,12 +56,12 @@ func TestMake(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if Make(tt.args.model); !reflect.DeepEqual(tt.args.model, tt.wantObject) {
+			if gotObject := Make(tt.args.model).(*Table); !reflect.DeepEqual(gotObject, tt.wantObject) {
 				t.Errorf("Make() = %v, want %v", tt.args.model, tt.wantObject)
-			} else if tt.args.model.(*Table).Field1 != table.Field1 ||
-				tt.args.model.(*Table).Field2 != table.Field2 ||
-				tt.args.model.(*Table).Field3 != table.Field3 ||
-				tt.args.model.(*Table).Model.Object == nil {
+			} else if gotObject.Field1 != table.Field1 ||
+				gotObject.Field2 != table.Field2 ||
+				gotObject.Field3 != table.Field3 ||
+				gotObject.Model.Object == nil {
 				t.Errorf("Make() = %v, want %v", tt.args.model, tt.wantObject)
 			}
 		})

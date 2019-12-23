@@ -13,8 +13,9 @@ type Model struct {
 	Object interface{}
 }
 
-func Make(model sorm) {
+func Make(model sorm) interface{} {
 	model.instant(model)
+	return model
 }
 
 func (m *Model) instant(object interface{}) {

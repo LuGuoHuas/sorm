@@ -16,12 +16,12 @@ func TestModel_GetTag(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		args    *args
+		args    args
 		wantTag string
 	}{
 		{
 			name: "normal",
-			args: &args{
+			args: args{
 				Field1: "string field",
 				Field2: 1024,
 				Field3: true,
@@ -32,7 +32,7 @@ func TestModel_GetTag(t *testing.T) {
 		},
 		{
 			name: "normal",
-			args: &args{
+			args: args{
 				Field1: "string field",
 				Field2: 1024,
 				Field3: true,
@@ -43,7 +43,7 @@ func TestModel_GetTag(t *testing.T) {
 		},
 		{
 			name: "normal",
-			args: &args{
+			args: args{
 				Field1: "string field",
 				Field2: 1024,
 				Field3: true,
@@ -54,7 +54,7 @@ func TestModel_GetTag(t *testing.T) {
 		},
 		{
 			name: "normal",
-			args: &args{
+			args: args{
 				Field1: "string field",
 				Field2: 1024,
 				Field3: true,
@@ -65,7 +65,7 @@ func TestModel_GetTag(t *testing.T) {
 		},
 		{
 			name: "normal",
-			args: &args{
+			args: args{
 				Field1: "string field",
 				Field2: 1024,
 				Field3: true,
@@ -79,8 +79,8 @@ func TestModel_GetTag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Make(tt.args)
-			if name := tt.args.getTag(&tt.args.Field5); name != tt.wantTag {
+			var obj = Make(&tt.args).(*args)
+			if name := tt.args.getTag(&obj.Field5); name != tt.wantTag {
 				t.Errorf("getTag() name = %v, want %v", name, tt.wantTag)
 			}
 		})
