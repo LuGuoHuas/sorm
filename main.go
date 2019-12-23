@@ -4,17 +4,17 @@ import (
 	"database/sql"
 )
 
-type model interface {
-	instant(obj interface{})
+type sorm interface {
+	instant(object interface{})
+	getTag(field interface{}) string
 }
 
 type Model struct {
 	Object interface{}
 }
 
-func Make(mod model) (object interface{}) {
-	mod.instant(mod)
-	return mod
+func Make(model sorm) {
+	model.instant(model)
 }
 
 type DB struct {

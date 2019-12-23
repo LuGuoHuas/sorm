@@ -32,14 +32,14 @@ func TestMake(t *testing.T) {
 		Model
 	}
 
-	var st1 = Table{
+	var table = Table{
 		Field1: "1234",
 		Field2: 1234,
 		Field3: true,
 	}
 
 	type args struct {
-		model model
+		model sorm
 	}
 	var tests = []struct {
 		name       string
@@ -49,20 +49,20 @@ func TestMake(t *testing.T) {
 		{
 			"normal",
 			args{
-				model: &st1,
+				model: &table,
 			},
-			&st1,
+			&table,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotObject := Make(tt.args.model); !reflect.DeepEqual(gotObject, tt.wantObject) {
-				t.Errorf("Make() = %v, want %v", gotObject, tt.wantObject)
-			} else if gotObject.(*Table).Field1 != st1.Field1 ||
-				gotObject.(*Table).Field2 != st1.Field2 ||
-				gotObject.(*Table).Field3 != st1.Field3 ||
-				gotObject.(*Table).Model.Object == nil {
-				t.Errorf("Make() = %v, want %v", gotObject, tt.wantObject)
+			if Make(tt.args.model); !reflect.DeepEqual(tt.args.model, tt.wantObject) {
+				t.Errorf("Make() = %v, want %v", tt.args.model, tt.wantObject)
+			} else if tt.args.model.(*Table).Field1 != table.Field1 ||
+				tt.args.model.(*Table).Field2 != table.Field2 ||
+				tt.args.model.(*Table).Field3 != table.Field3 ||
+				tt.args.model.(*Table).Model.Object == nil {
+				t.Errorf("Make() = %v, want %v", tt.args.model, tt.wantObject)
 			}
 		})
 	}
@@ -167,7 +167,7 @@ func TestDB_Close(t *testing.T) {
 		{
 			name:    "normal",
 			fields:  d,
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
