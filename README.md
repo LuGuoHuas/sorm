@@ -5,6 +5,7 @@ A Simple ORM
 ```go
 // connecting to database
 var db = sorm.Open("postgres", "host=myhost port=myport user=gorm dbname=gorm password=mypassword")
+var err error
 
 // Declaring Models
 type ObjectModel1 struct {
@@ -31,15 +32,18 @@ var obj2 = sorm.Make(&ObjectModel2{
 
 
 // Create Record
-var result, err = db.Create(obj1)
+err = db.Create(obj1).Error
 
 // Query
-var result, err = db.Table(obj1).Find()
-var result, err = db.Table(obj1).Filter(sorm.Eq(obj1.Field1, "field")).Group(obj.Field1).Limit(10).Find()
+err = db.Table(obj1).Find().Error
+err = db.Table(obj1).Filter(sorm.Eq(obj1.Field1, "field")).Group(obj.Field1).Limit(10).Find(&result).Error
 
 // Update
-var result, err = db.Table(obj1).Filter(sorm.Lte(obj1.Field2, 3), sorm.Eq(obj1.Field1, "field")).Update(obj1.Field2, "field")
+err = db.Table(obj1).Filter(sorm.Lte(obj1.Field2, 3), sorm.Eq(obj1.Field1, "field")).Update(obj1.Field2, "field").Error
+
+// Delete
+err = db.Table(obj1).Delete()
 
 // Join
-var result, err = db.Table(obj1).Join(obj2).On(obj1.Field1, obj2.Field2).On(obj1.Field2, obj2.Field1).Filter(sorm.Lte(obj1.Field2, 2)).Find()
+err = db.Table(obj1).Join(obj2).On(obj1.Field1, obj2.Field2).On(obj1.Field2, obj2.Field1).Filter(sorm.Lte(obj1.Field2, 2)).Find().Error
 ```
