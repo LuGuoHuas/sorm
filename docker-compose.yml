@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  mysql:
+    image: 'mysql:latest'
+    ports:
+      - 50001:3306
+    environment:
+      - MYSQL_DATABASE=sorm
+      - MYSQL_USER=sorm
+      - MYSQL_PASSWORD=T4SR46t4Iyev1qhTHQ8u5yuD
+      - MYSQL_RANDOM_ROOT_PASSWORD="yes"
+  postgres:
+    image: 'postgres:latest'
+    ports:
+      - 50002:5432
+    environment:
+      - POSTGRES_USER=sorm
+      - POSTGRES_DB=sorm
+      - POSTGRES_PASSWORD=T4SR46t4Iyev1qhTHQ8u5yuD
+  mssql:
+    image: 'mcmoe/mssqldocker:latest'
+    ports:
+      - 50003:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=T4SR46t4Iyev1qhTHQ8u5yuD
+      - MSSQL_DB=xorm
+      - MSSQL_USER=sorm
+      - MSSQL_PASSWORD=T4SR46t4Iyev1qhTHQ8u5yuD
