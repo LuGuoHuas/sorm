@@ -117,3 +117,17 @@ func (d *DB) Update(field, value interface{}) {
 		d.Error = err
 	}
 }
+
+func (d *DB) Delete() {
+	var err error
+	var s = bytes.NewBufferString("DELETE FROM ")
+	s.WriteString(d.scope.table)
+	s.WriteString(" WHERE ")
+	s.WriteString(d.scope.object.getField(0).Tag["column"])
+	s.WriteString("=?")
+
+	fmt.Println(s.String())
+	if _, err = d.db.Exec(s.String(), d.scope.object.getField(0).get(d.scope.object.getField(0).Pointer)); err != nil {
+		d.Error = err
+	}
+}
