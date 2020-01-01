@@ -247,13 +247,47 @@ func TestDB_Create(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.args.value = Make(&Table1{
-				Field1: "test",
+				//Field1: "test",
 				Field2: 1024,
 				Field3: true,
 			}).(*Table1)
 			if got := d.Create(tt.args.value); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Create() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestDB_Find(t *testing.T) {
+	var d *DB
+	if i, ok := TestData.Load(TestConnectKey); !ok || i == nil {
+		panic("failed to load database connection")
+	} else {
+		d = i.(*DB)
+	}
+	type args struct {
+		obj sorm
+	}
+	tests := []struct {
+		name   string
+		fields *DB
+		args   args
+	}{
+		{
+			name:   "normal",
+			fields: d,
+			args:   args{obj: nil},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.args.obj = Make(&Table1{
+				Field1: "test",
+				Field2: 1024,
+				Field3: true,
+			}).(*Table1)
+			d.Table(tt.args.obj).Find(tt.args.obj)
+			fmt.Println(tt.args.obj)
 		})
 	}
 }

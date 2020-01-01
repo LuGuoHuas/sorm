@@ -8,10 +8,15 @@ import (
 	"sync"
 )
 
+type Scope struct {
+	table string
+}
+
 type DB struct {
 	sync.RWMutex
 	db    *sql.DB
 	Error error
+	scope *Scope
 }
 
 func Open(driver, source string) (db *DB, err error) {
@@ -40,28 +45,57 @@ func (d *DB) Close() (err error) {
 	return d.db.Close()
 }
 
-func (d *DB) Create(value sorm) *DB {
+func (d *DB) Create(obj sorm) *DB {
 	var s bytes.Buffer
 	s.WriteString("INSERT INTO ")
-	s.WriteString(value.getTableName())
+	s.WriteString(obj.getTableName())
 	s.WriteString(" (")
-	for _, i := range value.getFieldIndex() {
-		s.WriteString(value.getField(i).Tag["column"])
+	for _, i := range obj.getFieldIndex() {
+		s.WriteString(obj.getField(i).Tag["column"])
 		s.WriteString(",")
-		if value.getField(i).Type == reflect.String {
-			fmt.Println(*(*string)(value.getField(i).Pointer))
+		if obj.getField(i).Type == reflect.String {
+			fmt.Println(*(*string)(obj.getField(i).Pointer))
 		}
 	}
 	s.Truncate(s.Len() - 1)
 	s.WriteString(") VALUES (")
-	for _, _ = range value.getFieldIndex() {
+	for range obj.getFieldIndex() {
 		s.WriteString("?,")
 	}
 	s.Truncate(s.Len() - 1)
 	s.WriteString(")")
 	fmt.Println(s.String())
-	if _, err := d.db.Exec(s.String(), value.getValue()...); err != nil {
+	if _, err := d.db.Exec(s.String(), obj.getValue()...); err != nil {
 		panic(err)
 	}
 	return d
+}
+
+func (d *DB) Table(obj sorm) *DB {
+	d.scope = &Scope{table: obj.getTableName()}
+	return d
+}
+
+func (d *DB) Find(obj sorm) {
+	var s bytes.Buffer
+	s.WriteString("SELECT * FROM ")
+	s.WriteString(obj.getTableName())
+	s.WriteString(" WHERE ")
+	for _, i := range obj.getFieldIndex() {
+		s.WriteString(obj.getField(i).Tag["column"])
+		s.WriteString("=? AND ")
+	}
+	s.Truncate(s.Len() - 4)
+	fmt.Println(s.String())
+	var rows, err = d.db.Query(s.String(), obj.getValue()...)
+	d.Error = err
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for rows.Next() {
+		if err = rows.Scan(obj.getValue()...); err != nil {
+			d.Error = err
+		}
+	}
 }

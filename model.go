@@ -1,6 +1,7 @@
 package sorm
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -13,14 +14,14 @@ type sorm interface {
 	setTableName()
 	getTableName() string
 	getFieldIndex() []int
-	getField(i int) StructField
+	getField(i int) *StructField
 	getFieldValue(i int) interface{}
 	getValue() []interface{}
 }
 
 type Model struct {
 	Object     interface{}
-	fields     map[int]StructField
+	fields     map[int]*StructField
 	fieldIndex []int
 	tableName  string
 }
@@ -33,21 +34,39 @@ func Make(model sorm) interface{} {
 
 func (m *Model) instant(object interface{}) {
 	m.Object = object
-	if m.fields == nil {
-		m.fields = make(map[int]StructField)
-	}
-	var e = reflect.TypeOf(object).Elem()
 	m.fieldIndex = make([]int, 0, 10)
+	if m.fields == nil {
+		m.fields = make(map[int]*StructField)
+	}
+
+	var e = reflect.TypeOf(object).Elem()
+	var field reflect.StructField
 	for i := 0; i < e.NumField(); i++ {
-		if e.Field(i).Name == "Model" {
+		field = e.Field(i)
+		if field.Name == "Model" {
 			continue
 		}
-		m.fields[int(e.Field(i).Offset)] = StructField{
-			Name:    e.Field(i).Name,
-			Tag:     analyseTag(e.Field(i).Tag.Get("sorm")),
-			Pointer: unsafe.Pointer(reflect.ValueOf(object).Pointer() + e.Field(i).Offset),
-			Type:    e.Field(i).Type.Kind(),
+		m.fields[int(field.Offset)] = &StructField{
+			Name:    field.Name,
+			Tag:     analyseTag(field.Tag.Get("sorm")),
+			Pointer: unsafe.Pointer(reflect.ValueOf(object).Pointer() + field.Offset),
+			Type:    field.Type.Kind(),
 		}
+
+		switch v := reflect.Indirect(reflect.ValueOf(object)).Field(i).Interface().(type) {
+		case string:
+			fmt.Println(v)
+			m.fields[int(field.Offset)].get = getString
+		case int:
+			fmt.Println(v)
+			m.fields[int(field.Offset)].get = getInt
+		case bool:
+			fmt.Println(v)
+			m.fields[int(field.Offset)].get = getBool
+		default:
+			fmt.Println(v)
+		}
+
 		m.fieldIndex = append(m.fieldIndex, int(e.Field(i).Offset))
 	}
 	sort.Ints(m.fieldIndex)
@@ -75,20 +94,12 @@ func (m *Model) getFieldIndex() []int {
 	return m.fieldIndex
 }
 
-func (m *Model) getField(i int) StructField {
+func (m *Model) getField(i int) *StructField {
 	return m.fields[i]
 }
 
 func (m *Model) getFieldValue(i int) interface{} {
-	switch m.fields[i].Type {
-	case reflect.String:
-		return *(*string)(m.fields[i].Pointer)
-	case reflect.Int:
-		return *(*int)(m.fields[i].Pointer)
-	case reflect.Bool:
-		return *(*bool)(m.fields[i].Pointer)
-	}
-	return *(*interface{})(m.fields[i].Pointer)
+	return m.fields[i].get(m.fields[i].Pointer)
 }
 
 func (m *Model) getValue() []interface{} {
