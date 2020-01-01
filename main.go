@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"unsafe"
 )
 
 type Scope struct {
-	table string
+	table  string
+	object sorm
 }
 
 type DB struct {
@@ -72,13 +74,12 @@ func (d *DB) Create(obj sorm) *DB {
 }
 
 func (d *DB) Table(obj sorm) *DB {
-	d.scope = &Scope{table: obj.getTableName()}
+	d.scope = &Scope{table: obj.getTableName(), object: obj}
 	return d
 }
 
 func (d *DB) Find(obj sorm) {
-	var s bytes.Buffer
-	s.WriteString("SELECT * FROM ")
+	var s = bytes.NewBufferString("SELECT * FROM ")
 	s.WriteString(obj.getTableName())
 	s.WriteString(" WHERE ")
 	for _, i := range obj.getFieldIndex() {
@@ -97,5 +98,22 @@ func (d *DB) Find(obj sorm) {
 		if err = rows.Scan(obj.getValue()...); err != nil {
 			d.Error = err
 		}
+	}
+}
+
+func (d *DB) Update(field, value interface{}) {
+	var err error
+	var f = d.scope.object.getFieldByPointer(unsafe.Pointer(reflect.ValueOf(field).Pointer()))
+	var s = bytes.NewBufferString("UPDATE ")
+	s.WriteString(d.scope.table)
+	s.WriteString(" SET ")
+	s.WriteString(f.Tag["column"])
+	s.WriteString("=? WHERE ")
+	s.WriteString(d.scope.object.getField(0).Tag["column"])
+	s.WriteString("=?")
+
+	fmt.Println(s.String())
+	if _, err = d.db.Exec(s.String(), value, d.scope.object.getField(0).get(d.scope.object.getField(0).Pointer)); err != nil {
+		d.Error = err
 	}
 }

@@ -17,6 +17,7 @@ type sorm interface {
 	getField(i int) *StructField
 	getFieldValue(i int) interface{}
 	getValue() []interface{}
+	getFieldByPointer(pointer unsafe.Pointer) *StructField
 }
 
 type Model struct {
@@ -108,6 +109,15 @@ func (m *Model) getValue() []interface{} {
 		result = append(result, m.getFieldValue(i))
 	}
 	return result
+}
+
+func (m *Model) getFieldByPointer(pointer unsafe.Pointer) *StructField {
+	for _, i := range m.getFieldIndex() {
+		if uintptr(pointer) == uintptr(m.getField(i).Pointer) {
+			return m.getField(i)
+		}
+	}
+	return nil
 }
 
 func analyseTag(tag string) (result map[string]string) {

@@ -291,3 +291,38 @@ func TestDB_Find(t *testing.T) {
 		})
 	}
 }
+
+func TestDB_Update(t *testing.T) {
+	var d *DB
+	if i, ok := TestData.Load(TestConnectKey); !ok || i == nil {
+		panic("failed to load database connection")
+	} else {
+		d = i.(*DB)
+	}
+	var obj = Make(&Table1{
+		Field1: "test",
+	}).(*Table1)
+	type args struct {
+		field interface{}
+		value interface{}
+	}
+	tests := []struct {
+		name   string
+		fields *DB
+		args   args
+	}{
+		{
+			name:   "normal",
+			fields: d,
+			args: args{
+				field: &obj.Field2,
+				value: 2048,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d.Table(obj).Update(&(obj.Field2), 2048)
+		})
+	}
+}
