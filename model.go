@@ -1,7 +1,6 @@
 package sorm
 
 import (
-	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -18,6 +17,7 @@ type sorm interface {
 	getFieldValue(i int) interface{}
 	getValue() []interface{}
 	getFieldByPointer(pointer unsafe.Pointer) *StructField
+	getPrimaryKey() *StructField
 }
 
 type Model struct {
@@ -25,6 +25,7 @@ type Model struct {
 	fields     map[int]*StructField
 	fieldIndex []int
 	tableName  string
+	keyMap     map[string]*StructField
 }
 
 func Make(model sorm) interface{} {
@@ -36,6 +37,7 @@ func Make(model sorm) interface{} {
 func (m *Model) instant(object interface{}) {
 	m.Object = object
 	m.fieldIndex = make([]int, 0, 10)
+	m.keyMap = make(map[string]*StructField)
 	if m.fields == nil {
 		m.fields = make(map[int]*StructField)
 	}
@@ -47,28 +49,13 @@ func (m *Model) instant(object interface{}) {
 		if field.Name == "Model" {
 			continue
 		}
-		m.fields[int(field.Offset)] = &StructField{
-			Name:    field.Name,
-			Tag:     analyseTag(field.Tag.Get("sorm")),
-			Pointer: unsafe.Pointer(reflect.ValueOf(object).Pointer() + field.Offset),
-			Type:    field.Type.Kind(),
-		}
-
-		switch v := reflect.Indirect(reflect.ValueOf(object)).Field(i).Interface().(type) {
-		case string:
-			fmt.Println(v)
-			m.fields[int(field.Offset)].get = getString
-		case int:
-			fmt.Println(v)
-			m.fields[int(field.Offset)].get = getInt
-		case bool:
-			fmt.Println(v)
-			m.fields[int(field.Offset)].get = getBool
-		default:
-			fmt.Println(v)
-		}
-
+		m.fields[int(field.Offset)] = newField(
+			reflect.Indirect(reflect.ValueOf(object)).Field(i).Interface(),
+			unsafe.Pointer(reflect.ValueOf(object).Pointer()+field.Offset),
+			field,
+		)
 		m.fieldIndex = append(m.fieldIndex, int(e.Field(i).Offset))
+		m.keyMap = getKey(m.fields[int(field.Offset)], m.keyMap)
 	}
 	sort.Ints(m.fieldIndex)
 }
@@ -118,6 +105,10 @@ func (m *Model) getFieldByPointer(pointer unsafe.Pointer) *StructField {
 		}
 	}
 	return nil
+}
+
+func (m *Model) getPrimaryKey() *StructField {
+	return m.keyMap["primary_key"]
 }
 
 func analyseTag(tag string) (result map[string]string) {
