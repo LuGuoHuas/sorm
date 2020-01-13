@@ -1,3 +1,9 @@
+[![GitHub license](https://img.shields.io/github/license/LuGHuaaa/sorm)](https://github.com/LuGHuaaa/sorm/blob/master/LICENSE)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/LuGHuaaa/sorm)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/LuGHuaaa/sorm/Go%20-%20Test)
+
+
+
 # sorm
 A Simple ORM
 
