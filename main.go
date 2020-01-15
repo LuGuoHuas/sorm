@@ -9,16 +9,14 @@ import (
 	"unsafe"
 )
 
-type Scope struct {
-	table  string
-	object sorm
-}
-
 type DB struct {
 	sync.RWMutex
-	db    *sql.DB
-	Error error
-	scope *Scope
+	db       *sql.DB
+	Error    error
+	scope    *scope
+	logger   Logger
+	search   *search
+	callback *Callback
 }
 
 func Open(driver, source string) (db *DB, err error) {
@@ -74,7 +72,7 @@ func (d *DB) Create(obj sorm) *DB {
 }
 
 func (d *DB) Table(obj sorm) *DB {
-	d.scope = &Scope{table: obj.getTableName(), object: obj}
+	d.scope = &scope{table: obj.getTableName(), object: obj}
 	return d
 }
 
@@ -130,4 +128,12 @@ func (d *DB) Delete() {
 	if _, err = d.db.Exec(s.String(), d.scope.object.getField(0).get(d.scope.object.getField(0).Pointer)); err != nil {
 		d.Error = err
 	}
+}
+
+func (d *DB) NewRecord(obj sorm) bool {
+	return true
+}
+
+func (d *DB) Save(obj sorm) *DB {
+	return d
 }

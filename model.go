@@ -108,7 +108,7 @@ func (m *Model) getFieldByPointer(pointer unsafe.Pointer) *StructField {
 }
 
 func (m *Model) getPrimaryKey() *StructField {
-	return m.keyMap["primary_key"]
+	return m.keyMap[PrimaryKeyTag]
 }
 
 func analyseTag(tag string) (result map[string]string) {

@@ -5,6 +5,10 @@ import (
 	"unsafe"
 )
 
+const PrimaryKeyTag = "primary_key"
+const TrueValue = "true"
+const FalseValue = "false"
+
 type StructField struct {
 	Name    string            `json:"name"`
 	Tag     map[string]string `json:"tag"`
@@ -41,6 +45,7 @@ func newField(In interface{}, pointer unsafe.Pointer, field reflect.StructField)
 	case bool:
 		newField.get = getBool
 	default:
+		// TODO need custom method support
 		panic(v)
 	}
 
@@ -50,9 +55,9 @@ func newField(In interface{}, pointer unsafe.Pointer, field reflect.StructField)
 func getKey(field *StructField, keyMap map[string]*StructField) map[string]*StructField {
 	for k, v := range field.Tag {
 		switch k {
-		case "PrimaryKey":
-			if v == "true" {
-				keyMap["PrimaryKey"] = field
+		case PrimaryKeyTag:
+			if v == TrueValue {
+				keyMap[PrimaryKeyTag] = field
 			}
 		}
 	}
