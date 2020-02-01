@@ -2,19 +2,19 @@ package sorm
 
 import "bytes"
 
-type scope struct {
+type Scope struct {
 	table     string
 	object    sorm
-	parent    *scope
-	subScope  *scope
+	parent    *Scope
+	subScope  *Scope
 	SQL       bytes.Buffer
 	SQLValues []interface{}
 	Values    interface{}
 	Search    *search
 }
 
-func (s *scope) generate() *scope {
-	var newScope = &scope{
+func (s *Scope) generate() *Scope {
+	var newScope = &Scope{
 		table:  s.table,
 		object: s.object,
 		parent: s,

@@ -13,7 +13,7 @@ type DB struct {
 	sync.RWMutex
 	db       *sql.DB
 	Error    error
-	scope    *scope
+	scope    *Scope
 	logger   Logger
 	search   *search
 	callback *Callback
@@ -72,7 +72,7 @@ func (d *DB) Create(obj sorm) *DB {
 }
 
 func (d *DB) Table(obj sorm) *DB {
-	d.scope = &scope{table: obj.getTableName(), object: obj}
+	d.scope = &Scope{table: obj.getTableName(), object: obj}
 	return d
 }
 

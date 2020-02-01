@@ -4,7 +4,7 @@ A Simple ORM
 ## example
 ```go
 // connecting to database
-var db = sorm.Open("postgres", "host=myhost port=myport user=gorm dbname=gorm password=mypassword")
+var db = sorm.Open("postgres", "host=myhost port=myport user=sorm dbname=sorm password=mypassword")
 
 // Declaring Models
 type ObjectModel1 struct {
